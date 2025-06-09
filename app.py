@@ -7,7 +7,6 @@ from sklearn.metrics.pairwise import cosine_distances
 from mpl_toolkits.mplot3d import Axes3D
 
 # ----------- CARGA DE DATOS Y MODELO ----------- #
-# Carga el modelo SVD y los datos necesarios
 with open('svd_model.pkl', 'rb') as f:
     modelo = pickle.load(f)
 
