@@ -120,19 +120,25 @@ cliente_ids = df_final['NumeroSocioConsumidor'].sort_values().unique()
 client_id = st.selectbox("Selecciona un cliente", cliente_ids)
 num_recs = st.slider("Número de recomendaciones", 1, 10, value=5)
 
+
 # Mostrar recomendaciones
+
 resultados, error, fig3d = recommend_restaurants_for_client_SVD(client_id, n=num_recs)
-if error:
-    st.error(error)
-else:
-    st.success("¡Recomendaciones generadas exitosamente!")
-    st.dataframe(resultados)
+if st.button("Recomendar"):
+    if error:
+        st.error(error)
+    else:
+        st.success("¡Recomendaciones generadas exitosamente!")
+        st.dataframe(resultados)
 
-# ----------- INSIGHTS ----------- #
-st.markdown("## 📊 Insights del Cliente")
-st.markdown("#### Preferencias de categorías de comida (Pie Chart)")
-plot_preference_pie_nivo(client_id)
+        # ----------- INSIGHTS ----------- #
+        st.markdown("## 📊 Insights del Cliente")
+        st.markdown("#### Preferencias de categorías de comida (Pie Chart)")
+        plot_preference_pie_nivo(client_id)
 
-st.markdown("#### Visualización 3D en espacio SVD")
-if fig3d:
-    st.pyplot(fig3d)
+        st.markdown("#### Visualización 3D en espacio SVD")
+        if fig3d:
+            st.pyplot(fig3d)
+
+    
+
