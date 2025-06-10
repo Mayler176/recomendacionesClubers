@@ -57,7 +57,7 @@ def plot_preference_pie_nivo(client_id):
         {
             "id": cat,
             "label": cat,
-            "value": round(val, 2)*100,
+            "value":  str(round(99.12348273*100, 2)) + "%",
             "color": f"hsl({(i * 37) % 360}, 70%, 50%)"
         }
         for i, (cat, val) in enumerate(renombradas.items())
@@ -95,26 +95,6 @@ def plot_preference_pie_nivo(client_id):
                 arcLabelsSkipAngle=0,  # para asegurar que no aparezcan estáticas
                 arcLabelsTextColor="transparent",  # oculta texto en secciones
                 theme=dark_theme,
-                defs=[
-                    {
-                        "id": "dots",
-                        "type": "patternDots",
-                        "background": "inherit",
-                        "color": "rgba(255, 255, 255, 0.3)",
-                        "size": 4,
-                        "padding": 1,
-                        "stagger": True,
-                    },
-                    {
-                        "id": "lines",
-                        "type": "patternLines",
-                        "background": "inherit",
-                        "color": "rgba(255, 255, 255, 0.3)",
-                        "rotation": -45,
-                        "lineWidth": 6,
-                        "spacing": 10,
-                    },
-                ],
                 fill=[
                     {"match": {"id": renombradas.index[0]}, "id": "dots"},
                     {"match": {"id": renombradas.index[1]}, "id": "lines"},
@@ -148,13 +128,13 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
         'EstablishmentId': df_categorias_restaurantes_clubers.iloc[nearest]['EstablishmentId'].values,
         'distance': dists[nearest]
     })
-    recs['similarity'] = 1 - recs['distance']
+    recs['Similitud'] = str((1 - recs['distance'])*100) + "%"
     recs = recs.merge(df_rest_info, on='EstablishmentId', how='left')
 
     top_cats = get_client_preferences(client_id).head(3).index.tolist()
-    recs['Cliente_Gusta'] = ", ".join(top_cats)
+    recs['Porque al cliente le gusta'] = ", ".join(top_cats)
 
-    result = recs[['RestaurantName', 'distance', 'similarity', 'Latitude', 'Longitude', 'Cliente_Gusta']]
+    result = recs[['Restaurante', 'Similitud', 'Porque al cliente le gusta']]
 
     # Gráfico 3D
     fig = plt.figure(figsize=(10, 7))
