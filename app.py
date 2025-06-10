@@ -133,7 +133,7 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
 
     top_cats = get_client_preferences(client_id).head(3).index.tolist()
     recs['Porque al cliente le gusta'] = ", ".join(top_cats)
-
+    recs.rename(columns={'RestaurantName': 'Restaurante'}, inplace=True)
     result = recs[['Restaurante', 'Similitud', 'Porque al cliente le gusta']]
 
     # Gráfico 3D
