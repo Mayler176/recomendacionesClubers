@@ -132,7 +132,7 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
     })
 
     #CAMBIO DE ESTA VERSION
-    recs['Similitud'] = str(round((1 - recs['distance'])*100,2)) + "%"
+    recs['Similitud'] = round((1 - recs['distance'])*100,2)
 
     recs = recs.merge(df_rest_info, on='EstablishmentId', how='left')
 
