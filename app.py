@@ -138,7 +138,7 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
     recs.rename(columns={'RestaurantName': 'Restaurante'}, inplace=True)
 
 
-    result = recs[['RestaurantName', 'Porque al cliente le gusta']]
+    result = recs[['Restaurante', 'Porque al cliente le gusta']]
 
     # Gráfico 3D
     fig = plt.figure(figsize=(10, 7))
