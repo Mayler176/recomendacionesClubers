@@ -39,34 +39,7 @@ def get_client_preferences(client_id):
 from streamlit_elements import elements, mui, nivo
 import streamlit as st
 
-def theme_check():
-    if st.session_state.get("mode", "light") == "dark":
-        return {
-            "background": "#0e1117",
-            "textColor": "#fafafa",
-            "tooltip": {
-                "container": {
-                    "background": "#262730",
-                    "color": "#fff",
-                    "border": "solid 3px #F0F2F6",
-                    "border-radius": "8px",
-                    "padding": 5,
-                }
-            }
-        }
-    else:
-        return {
-            "background": "#fff",
-            "textColor": "#262730",
-            "tooltip": {
-                "container": {
-                    "background": "#F0F2F6",
-                    "color": "#31333F",
-                    "border": "solid 3px #262730",
-                    "border-radius": "8px",
-                }
-            }
-        }
+
 
 def plot_preference_pie_nivo(client_id):
     preferencias = get_client_preferences(client_id)
@@ -74,15 +47,37 @@ def plot_preference_pie_nivo(client_id):
         st.warning("Este cliente no tiene preferencias registradas.")
         return
 
+    # Renombrar categorías según lo solicitado
+    renombradas = preferencias.rename({
+        "bebidas": "bebidas alcoholicas",
+        "categoria_2": "bebidas",
+        "categoria_8": "otros"
+    })
+
+    # Truncar valores a 2 decimales
     pie_data = [
         {
             "id": cat,
             "label": cat,
-            "value": val,
+            "value": round(val, 2),
             "color": f"hsl({(i * 37) % 360}, 70%, 50%)"
         }
-        for i, (cat, val) in enumerate(preferencias.items())
+        for i, (cat, val) in enumerate(renombradas.items())
     ]
+
+    dark_theme = {
+        "background": "#0e1117",
+        "textColor": "#fafafa",
+        "tooltip": {
+            "container": {
+                "background": "#262730",
+                "color": "#fff",
+                "border": "solid 3px #F0F2F6",
+                "border-radius": "8px",
+                "padding": 5,
+            }
+        }
+    }
 
     with elements("nivo_pie_chart"):
         with mui.Box(sx={"height": 500}):
@@ -95,13 +90,13 @@ def plot_preference_pie_nivo(client_id):
                 activeOuterRadiusOffset=8,
                 borderWidth=1,
                 borderColor={"from": "color", "modifiers": [["darker", 0.8]]},
-                arcLinkLabelsSkipAngle=10,
-                arcLinkLabelsTextColor="grey",
+                arcLinkLabelsSkipAngle=0,
+                arcLinkLabelsTextColor="#ccc",
                 arcLinkLabelsThickness=2,
                 arcLinkLabelsColor={"from": "color"},
-                arcLabelsSkipAngle=10,
-                arcLabelsTextColor={"from": "color", "modifiers": [["darker", 4]]},
-                theme=theme_check(),
+                arcLabelsSkipAngle=0,  # para asegurar que no aparezcan estáticas
+                arcLabelsTextColor="transparent",  # oculta texto en secciones
+                theme=dark_theme,
                 defs=[
                     {
                         "id": "dots",
@@ -123,9 +118,9 @@ def plot_preference_pie_nivo(client_id):
                     },
                 ],
                 fill=[
-                    {"match": {"id": preferencias.index[0]}, "id": "dots"},
-                    {"match": {"id": preferencias.index[1]}, "id": "lines"},
-                    {"match": {"id": preferencias.index[2]}, "id": "dots"} if len(preferencias) > 2 else {},
+                    {"match": {"id": renombradas.index[0]}, "id": "dots"},
+                    {"match": {"id": renombradas.index[1]}, "id": "lines"},
+                    {"match": {"id": renombradas.index[2]}, "id": "dots"} if len(renombradas) > 2 else {},
                 ],
                 legends=[
                     {
@@ -137,7 +132,7 @@ def plot_preference_pie_nivo(client_id):
                         "itemTextColor": "#999",
                         "symbolSize": 18,
                         "symbolShape": "circle",
-                        "effects": [{"on": "hover", "style": {"itemTextColor": "#000"}}],
+                        "effects": [{"on": "hover", "style": {"itemTextColor": "#fff"}}],
                     }
                 ],
             )
