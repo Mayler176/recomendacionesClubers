@@ -161,30 +161,32 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
 
     return result, None, fig
 
-# ----------- INTERFAZ STREAMLIT ----------- #
-st.set_page_config(page_title="Recomendador Clubers", layout="centered")
-st.title("🍽️ Recomendador de Restaurantes - Clubers")
 
-# Menú desplegable arriba
-cliente_ids = df_final['NumeroSocioConsumidor'].sort_values().unique()
-client_id = st.selectbox("Selecciona un cliente", cliente_ids)
-num_recs = st.slider("Número de recomendaciones", 1, 10, value=5)
+def run():
+    # ----------- INTERFAZ STREAMLIT ----------- #
+    st.set_page_config(page_title="Recomendador Clubers", layout="centered")
+    st.title("🍽️ Recomendador de Restaurantes - Clubers")
+
+    # Menú desplegable arriba
+    cliente_ids = df_final['NumeroSocioConsumidor'].sort_values().unique()
+    client_id = st.selectbox("Selecciona un cliente", cliente_ids)
+    num_recs = st.slider("Número de recomendaciones", 1, 10, value=5)
 
 
-# Mostrar recomendaciones
+    # Mostrar recomendaciones
 
-resultados, error, fig3d = recommend_restaurants_for_client_SVD(client_id, n=num_recs)
-if st.button("Recomendar"):
-    if error:
-        st.error(error)
-    else:
-        st.success("¡Recomendaciones generadas exitosamente!")
-        st.dataframe(resultados)
+    resultados, error, fig3d = recommend_restaurants_for_client_SVD(client_id, n=num_recs)
+    if st.button("Recomendar"):
+        if error:
+            st.error(error)
+        else:
+            st.success("¡Recomendaciones generadas exitosamente!")
+            st.dataframe(resultados)
 
-        # ----------- INSIGHTS ----------- #
-        st.markdown("## 📊 Insights del Cliente")
-        st.markdown("#### Preferencias de categorías de comida (Pie Chart)")
-        plot_preference_pie_nivo(client_id)
+            # ----------- INSIGHTS ----------- #
+            st.markdown("## 📊 Insights del Cliente")
+            st.markdown("#### Preferencias de categorías de comida (Pie Chart)")
+            plot_preference_pie_nivo(client_id)
 
 
     
