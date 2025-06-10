@@ -9,6 +9,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from streamlit_elements import elements, mui, html
 from streamlit_elements import nivo
 
+
+
 # ----------- CARGA DE DATOS Y MODELO ----------- #
 with open('svd_model.pkl', 'rb') as f:
     modelo = pickle.load(f)
@@ -18,6 +20,8 @@ X_clients_svd = modelo['X_clients_svd']
 df_final = modelo['df_final']
 df_categorias_restaurantes_clubers = modelo['df_categorias_restaurantes_clubers']
 df_rest_info = modelo['df_rest_info']
+
+
 
 # ----------- FUNCIONES AUXILIARES ----------- #
 def get_feature_columns():
@@ -32,13 +36,53 @@ def get_client_preferences(client_id):
     preferencias = df_final.loc[idx, feature_cols]
     return preferencias[preferencias > 0].sort_values(ascending=False)
 
+from streamlit_elements import elements, mui, nivo
+import streamlit as st
+
+def theme_check():
+    if st.session_state.get("mode", "light") == "dark":
+        return {
+            "background": "#0e1117",
+            "textColor": "#fafafa",
+            "tooltip": {
+                "container": {
+                    "background": "#262730",
+                    "color": "#fff",
+                    "border": "solid 3px #F0F2F6",
+                    "border-radius": "8px",
+                    "padding": 5,
+                }
+            }
+        }
+    else:
+        return {
+            "background": "#fff",
+            "textColor": "#262730",
+            "tooltip": {
+                "container": {
+                    "background": "#F0F2F6",
+                    "color": "#31333F",
+                    "border": "solid 3px #262730",
+                    "border-radius": "8px",
+                }
+            }
+        }
+
 def plot_preference_pie_nivo(client_id):
     preferencias = get_client_preferences(client_id)
     if preferencias is None or preferencias.empty:
         st.warning("Este cliente no tiene preferencias registradas.")
         return
 
-    pie_data = [{"id": k, "label": k, "value": v, "color": f"hsl({(i*37)%360}, 70%, 50%)"} for i, (k, v) in enumerate(preferencias.items())]
+    pie_data = [
+        {
+            "id": cat,
+            "label": cat,
+            "value": val,
+            "color": f"hsl({(i * 37) % 360}, 70%, 50%)"
+        }
+        for i, (cat, val) in enumerate(preferencias.items())
+    ]
 
     with elements("nivo_pie_chart"):
         with mui.Box(sx={"height": 500}):
@@ -57,6 +101,32 @@ def plot_preference_pie_nivo(client_id):
                 arcLinkLabelsColor={"from": "color"},
                 arcLabelsSkipAngle=10,
                 arcLabelsTextColor={"from": "color", "modifiers": [["darker", 4]]},
+                theme=theme_check(),
+                defs=[
+                    {
+                        "id": "dots",
+                        "type": "patternDots",
+                        "background": "inherit",
+                        "color": "rgba(255, 255, 255, 0.3)",
+                        "size": 4,
+                        "padding": 1,
+                        "stagger": True,
+                    },
+                    {
+                        "id": "lines",
+                        "type": "patternLines",
+                        "background": "inherit",
+                        "color": "rgba(255, 255, 255, 0.3)",
+                        "rotation": -45,
+                        "lineWidth": 6,
+                        "spacing": 10,
+                    },
+                ],
+                fill=[
+                    {"match": {"id": preferencias.index[0]}, "id": "dots"},
+                    {"match": {"id": preferencias.index[1]}, "id": "lines"},
+                    {"match": {"id": preferencias.index[2]}, "id": "dots"} if len(preferencias) > 2 else {},
+                ],
                 legends=[
                     {
                         "anchor": "bottom",
