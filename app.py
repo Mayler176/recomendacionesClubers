@@ -134,9 +134,11 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
     recs = recs.merge(df_rest_info, on='EstablishmentId', how='left')
 
     top_cats = get_client_preferences(client_id).head(3).index.tolist()
-    recs['Cliente_Gusta'] = ", ".join(top_cats)
+    recs['Porque al cliente le gusta'] = ", ".join(top_cats)
+    recs.rename(columns={'RestaurantName': 'Restaurante'}, inplace=True)
 
-    result = recs[['RestaurantName', 'distance', 'similarity', 'Latitude', 'Longitude', 'Cliente_Gusta']]
+
+    result = recs[['RestaurantName', 'Porque al cliente le gusta']]
 
     # Gráfico 3D
     fig = plt.figure(figsize=(10, 7))
