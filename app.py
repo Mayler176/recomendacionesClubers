@@ -130,7 +130,10 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
         'EstablishmentId': df_categorias_restaurantes_clubers.iloc[nearest]['EstablishmentId'].values,
         'distance': dists[nearest]
     })
-    recs['Similitud'] = round((1 - recs['distance'])*100,2)
+
+    #CAMBIO DE ESTA VERSION
+    recs['Similitud'] = str(round((1 - recs['distance'])*100,2)) + "%"
+
     recs = recs.merge(df_rest_info, on='EstablishmentId', how='left')
 
     top_cats = get_client_preferences(client_id).head(3).index.tolist()
@@ -183,9 +186,6 @@ if st.button("Recomendar"):
         st.markdown("#### Preferencias de categorías de comida (Pie Chart)")
         plot_preference_pie_nivo(client_id)
 
-        st.markdown("#### Visualización 3D en espacio SVD")
-        if fig3d:
-            st.pyplot(fig3d)
 
     
 
