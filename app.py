@@ -1,4 +1,5 @@
 import Encuesta
+import Recomendaciones
 
 PAGES = {
     "Recomendaciones": Recomendaciones,
