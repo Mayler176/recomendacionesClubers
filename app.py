@@ -53,7 +53,7 @@ def plot_preference_pie_nivo(client_id):
         {
             "id": cat,
             "label": cat,
-            "value": str(round(val, 2)*100) + "%",
+            "value": round(val, 2)
             "color": f"hsl({(i * 37) % 360}, 70%, 50%)"
         }
         for i, (cat, val) in enumerate(renombradas.items())
@@ -88,13 +88,33 @@ def plot_preference_pie_nivo(client_id):
                 arcLinkLabelsTextColor="#ccc",
                 arcLinkLabelsThickness=2,
                 arcLinkLabelsColor={"from": "color"},
-                arcLabelsSkipAngle=0,  # para asegurar que no aparezcan estáticas
-                arcLabelsTextColor="transparent",  # oculta texto en secciones
-                theme=dark_theme,
+                arcLabelsSkipAngle=10,
+                arcLabelsTextColor={"from": "color", "modifiers": [["darker", 4]]},
+                theme=theme_check(),
+                defs=[
+                    {
+                        "id": "dots",
+                        "type": "patternDots",
+                        "background": "inherit",
+                        "color": "rgba(255, 255, 255, 0.3)",
+                        "size": 4,
+                        "padding": 1,
+                        "stagger": True,
+                    },
+                    {
+                        "id": "lines",
+                        "type": "patternLines",
+                        "background": "inherit",
+                        "color": "rgba(255, 255, 255, 0.3)",
+                        "rotation": -45,
+                        "lineWidth": 6,
+                        "spacing": 10,
+                    },
+                ],
                 fill=[
-                    {"match": {"id": renombradas.index[0]}, "id": "dots"},
-                    {"match": {"id": renombradas.index[1]}, "id": "lines"},
-                    {"match": {"id": renombradas.index[2]}, "id": "dots"} if len(renombradas) > 2 else {},
+                    {"match": {"id": preferencias.index[0]}, "id": "dots"},
+                    {"match": {"id": preferencias.index[1]}, "id": "lines"},
+                    {"match": {"id": preferencias.index[2]}, "id": "dots"} if len(preferencias) > 2 else {},
                 ],
                 legends=[
                     {
@@ -124,7 +144,7 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
         'EstablishmentId': df_categorias_restaurantes_clubers.iloc[nearest]['EstablishmentId'].values,
         'distance': dists[nearest]
     })
-    recs['Similitud'] = 1 - recs['distance']
+    recs['Similitud'] = str((1 - recs['distance'])*100) + "%"
     recs = recs.merge(df_rest_info, on='EstablishmentId', how='left')
 
     top_cats = get_client_preferences(client_id).head(3).index.tolist()
