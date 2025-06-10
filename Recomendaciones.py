@@ -1,15 +1,13 @@
 import streamlit as st
+st.set_page_config(page_title="Recomendador Clubers", layout="centered")  # ← debe ir aquí arriba
+
 import pandas as pd
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_distances
 from mpl_toolkits.mplot3d import Axes3D
-
-from streamlit_elements import elements, mui, html
-from streamlit_elements import nivo
-
-
+from streamlit_elements import elements, mui, html, nivo
 
 # ----------- CARGA DE DATOS Y MODELO ----------- #
 with open('svd_model.pkl', 'rb') as f:
@@ -20,8 +18,6 @@ X_clients_svd = modelo['X_clients_svd']
 df_final = modelo['df_final']
 df_categorias_restaurantes_clubers = modelo['df_categorias_restaurantes_clubers']
 df_rest_info = modelo['df_rest_info']
-
-
 
 # ----------- FUNCIONES AUXILIARES ----------- #
 def get_feature_columns():
@@ -36,25 +32,18 @@ def get_client_preferences(client_id):
     preferencias = df_final.loc[idx, feature_cols]
     return preferencias[preferencias > 0].sort_values(ascending=False)
 
-from streamlit_elements import elements, mui, nivo
-import streamlit as st
-
-
-
 def plot_preference_pie_nivo(client_id):
     preferencias = get_client_preferences(client_id)
     if preferencias is None or preferencias.empty:
         st.warning("Este cliente no tiene preferencias registradas.")
         return
 
-    # Renombrar categorías según lo solicitado
     renombradas = preferencias.rename({
         "bebidas": "bebidas alcoholicas",
         "categoria_2": "bebidas",
         "categoria_8": "otros"
     })
 
-    # Truncar valores a 2 decimales
     pie_data = [
         {
             "id": cat,
@@ -94,8 +83,8 @@ def plot_preference_pie_nivo(client_id):
                 arcLinkLabelsTextColor="#ccc",
                 arcLinkLabelsThickness=2,
                 arcLinkLabelsColor={"from": "color"},
-                arcLabelsSkipAngle=0,  # para asegurar que no aparezcan estáticas
-                arcLabelsTextColor="transparent",  # oculta texto en secciones
+                arcLabelsSkipAngle=0,
+                arcLabelsTextColor="transparent",
                 theme=dark_theme,
                 fill=[
                     {"match": {"id": renombradas.index[0]}, "id": "dots"},
@@ -130,20 +119,15 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
         'EstablishmentId': df_categorias_restaurantes_clubers.iloc[nearest]['EstablishmentId'].values,
         'distance': dists[nearest]
     })
-
-    #CAMBIO DE ESTA VERSION
-    recs['Similitud'] = round((1 - recs['distance'])*100,2)
-
+    recs['Similitud'] = round((1 - recs['distance']) * 100, 2)
     recs = recs.merge(df_rest_info, on='EstablishmentId', how='left')
 
     top_cats = get_client_preferences(client_id).head(3).index.tolist()
     recs['Porque al cliente le gusta'] = ", ".join(top_cats)
     recs.rename(columns={'RestaurantName': 'Restaurante'}, inplace=True)
 
-
     result = recs[['Restaurante', 'Similitud', 'Porque al cliente le gusta']]
 
-    # Gráfico 3D
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(projection='3d')
     ax.scatter(X_rests_svd[:, 0], X_rests_svd[:, 1], X_rests_svd[:, 2],
@@ -161,19 +145,13 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
 
     return result, None, fig
 
-
+# ----------- INTERFAZ STREAMLIT ----------- #
 def run():
-    # ----------- INTERFAZ STREAMLIT ----------- #
-    st.set_page_config(page_title="Recomendador Clubers", layout="centered")
     st.title("🍽️ Recomendador de Restaurantes - Clubers")
 
-    # Menú desplegable arriba
     cliente_ids = df_final['NumeroSocioConsumidor'].sort_values().unique()
     client_id = st.selectbox("Selecciona un cliente", cliente_ids)
     num_recs = st.slider("Número de recomendaciones", 1, 10, value=5)
-
-
-    # Mostrar recomendaciones
 
     resultados, error, fig3d = recommend_restaurants_for_client_SVD(client_id, n=num_recs)
     if st.button("Recomendar"):
@@ -183,11 +161,9 @@ def run():
             st.success("¡Recomendaciones generadas exitosamente!")
             st.dataframe(resultados)
 
-            # ----------- INSIGHTS ----------- #
             st.markdown("## 📊 Insights del Cliente")
             st.markdown("#### Preferencias de categorías de comida (Pie Chart)")
             plot_preference_pie_nivo(client_id)
 
-
-    
-
+            st.markdown("#### Visualización 3D en espacio SVD")
+            st.pyplot(fig3d)
