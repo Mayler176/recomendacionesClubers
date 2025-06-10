@@ -16,24 +16,50 @@ df_final = modelo['df_final']
 df_categorias_restaurantes_clubers = modelo['df_categorias_restaurantes_clubers']
 df_rest_info = modelo['df_rest_info']
 
+# ----------- FUNCIÓN PIE CHART ----------- #
+def plot_preference_pie(client_id):
+    idxs = df_final.index[df_final['NumeroSocioConsumidor'] == client_id].tolist()
+    if not idxs:
+        return None
+    idx = idxs[0]
+
+    feature_cols = [c for c in df_categorias_restaurantes_clubers.columns if c not in ('EstablishmentId', 'category')]
+    preferencias = df_final.loc[idx, feature_cols]
+    preferencias = preferencias[preferencias > 0]
+
+    if preferencias.empty:
+        return None
+
+    fig, ax = plt.subplots()
+    ax.pie(preferencias, labels=preferencias.index, autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')
+    plt.title(f"Preferencias del Cliente {client_id}")
+    return fig
+
 # ----------- FUNCIÓN DE RECOMENDACIÓN ----------- #
 def recommend_restaurants_for_client_SVD(client_id, n=5, plot_3d=False):
     idxs = df_final.index[df_final['NumeroSocioConsumidor'] == client_id].tolist()
     if not idxs:
         return None, f"Cliente {client_id} no encontrado."
-    
-    client_vec_svd = X_clients_svd[idxs[0]].reshape(1, -1)
+    idx = idxs[0]
+    client_vec_svd = X_clients_svd[idx].reshape(1, -1)
     dists = cosine_distances(client_vec_svd, X_rests_svd)[0]
     nearest = dists.argsort()[:n]
-    
+
     recs = pd.DataFrame({
         'EstablishmentId': df_categorias_restaurantes_clubers.iloc[nearest]['EstablishmentId'].values,
         'distance': dists[nearest]
     })
-    recs['Similitud'] = 1 - recs['distance']
+    recs['similarity'] = 1 - recs['distance']
     recs = recs.merge(df_rest_info, on='EstablishmentId', how='left')
-    result = recs[['RestaurantName', 'distance', 'Similitud']]
-    
+
+    feature_cols = [c for c in df_categorias_restaurantes_clubers.columns if c not in ('EstablishmentId', 'category')]
+    top_cats_idx = df_final.loc[idx, feature_cols].sort_values(ascending=False).head(3)
+    categorias_favoritas = ", ".join(top_cats_idx.index)
+    recs['Cliente_Gusta'] = categorias_favoritas
+
+    result = recs[['RestaurantName', 'distance', 'similarity', 'Latitude', 'Longitude', 'Cliente_Gusta']]
+
     fig = None
     if plot_3d:
         fig = plt.figure(figsize=(10, 7))
@@ -54,13 +80,25 @@ def recommend_restaurants_for_client_SVD(client_id, n=5, plot_3d=False):
     return result, fig
 
 # ----------- INTERFAZ DE STREAMLIT ----------- #
+st.set_page_config(page_title="Recomendador Clubers", layout="centered")
+
 st.title("🍽️ Recomendador de Restaurantes - Clubers")
-st.markdown("Introduce tu ID de cliente para obtener recomendaciones personalizadas.")
 
-client_id = st.number_input("Número de Cliente", min_value=1, step=1)
-num_recs = st.slider("¿Cuántas recomendaciones deseas?", 1, 10, value=5)
-plot = st.checkbox("Mostrar gráfica 3D de recomendaciones")
+# Sidebar: selección de cliente y opciones
+st.sidebar.header("Opciones")
+cliente_ids = df_final['NumeroSocioConsumidor'].sort_values().unique()
+client_id = st.sidebar.selectbox("Selecciona un cliente", cliente_ids)
+num_recs = st.sidebar.slider("Número de recomendaciones", 1, 10, value=5)
+plot = st.sidebar.checkbox("Mostrar gráfico 3D")
 
+# Mostrar gráfico de pastel
+pie_chart = plot_preference_pie(client_id)
+if pie_chart:
+    st.pyplot(pie_chart)
+else:
+    st.warning("Este cliente no tiene preferencias registradas.")
+
+# Botón principal
 if st.button("Recomendar"):
     resultados, grafica = recommend_restaurants_for_client_SVD(client_id, n=num_recs, plot_3d=plot)
     if resultados is None:
