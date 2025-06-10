@@ -30,9 +30,9 @@ def recommend_restaurants_for_client_SVD(client_id, n=5, plot_3d=False):
         'EstablishmentId': df_categorias_restaurantes_clubers.iloc[nearest]['EstablishmentId'].values,
         'distance': dists[nearest]
     })
-    recs['similarity'] = 1 - recs['distance']
+    recs['Similitud'] = 1 - recs['distance']
     recs = recs.merge(df_rest_info, on='EstablishmentId', how='left')
-    result = recs[['RestaurantName', 'distance', 'similarity', 'Latitude', 'Longitude']]
+    result = recs[['RestaurantName', 'distance', 'Similitud']]
     
     fig = None
     if plot_3d:
