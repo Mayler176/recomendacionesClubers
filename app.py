@@ -57,7 +57,7 @@ def plot_preference_pie_nivo(client_id):
         {
             "id": cat,
             "label": cat,
-            "value": round(val, 2),
+            "value": round(val, 2)*100 + "%",
             "color": f"hsl({(i * 37) % 360}, 70%, 50%)"
         }
         for i, (cat, val) in enumerate(renombradas.items())
