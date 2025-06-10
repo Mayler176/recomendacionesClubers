@@ -9,8 +9,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from streamlit_elements import elements, mui, html
 from streamlit_elements import nivo
 
-
-
 # ----------- CARGA DE DATOS Y MODELO ----------- #
 with open('svd_model.pkl', 'rb') as f:
     modelo = pickle.load(f)
@@ -20,8 +18,6 @@ X_clients_svd = modelo['X_clients_svd']
 df_final = modelo['df_final']
 df_categorias_restaurantes_clubers = modelo['df_categorias_restaurantes_clubers']
 df_rest_info = modelo['df_rest_info']
-
-
 
 # ----------- FUNCIONES AUXILIARES ----------- #
 def get_feature_columns():
