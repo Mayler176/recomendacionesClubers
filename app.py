@@ -124,7 +124,7 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
         'EstablishmentId': df_categorias_restaurantes_clubers.iloc[nearest]['EstablishmentId'].values,
         'distance': dists[nearest]
     })
-    recs['Similitud'] = (1 - recs['distance'])*100
+    recs['Similitud'] = 1 - recs['distance']
     recs = recs.merge(df_rest_info, on='EstablishmentId', how='left')
 
     top_cats = get_client_preferences(client_id).head(3).index.tolist()
