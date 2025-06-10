@@ -57,7 +57,11 @@ def plot_preference_pie_nivo(client_id):
         {
             "id": cat,
             "label": cat,
+<<<<<<< HEAD
             "value":  str(round(99.12348273*100, 2)) + "%",
+=======
+            "value": round(val, 2)*100 + "%",
+>>>>>>> parent of cfbb5a0 (corrección de estilo del pie chart)
             "color": f"hsl({(i * 37) % 360}, 70%, 50%)"
         }
         for i, (cat, val) in enumerate(renombradas.items())
