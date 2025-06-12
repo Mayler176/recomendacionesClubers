@@ -14,7 +14,7 @@ df_rest_info = modelo['df_rest_info']
 
 # Categorías que deben coincidir con el modelo
 CATEGORIAS = [
-    "Asiática", "Bebidas", "Categoría_2", "Categorpia_8",
+    "Asiática", "Bebidas", "Categoría_2", "Categoría_8",
     "Comida_Rápida", "Desayunos", "Italiana", "Postres", "Saludable"
 ]
 

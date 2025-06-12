@@ -4,12 +4,14 @@ import streamlit as st
 
 import Recomendaciones
 import Encuesta
+import ModeloPlatillos
 
 # Diccionario de páginas
 PAGES = {
 
     "🍽️ Recomendaciones": Recomendaciones,
     "📋 Encuesta personalizada": Encuesta,
+    "Restaurantes más cercanos": ModeloPlatillos
 }
 
 # Configuración de página general

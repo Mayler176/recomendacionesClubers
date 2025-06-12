@@ -86,11 +86,6 @@ def plot_preference_pie_nivo(client_id):
                 arcLabelsSkipAngle=0,
                 arcLabelsTextColor="transparent",
                 theme=dark_theme,
-                fill=[
-                    {"match": {"id": renombradas.index[0]}, "id": "dots"},
-                    {"match": {"id": renombradas.index[1]}, "id": "lines"},
-                    {"match": {"id": renombradas.index[2]}, "id": "dots"} if len(renombradas) > 2 else {},
-                ],
                 legends=[
                     {
                         "anchor": "bottom",
@@ -128,22 +123,8 @@ def recommend_restaurants_for_client_SVD(client_id, n=5):
 
     result = recs[['Restaurante', 'Similitud', 'Porque al cliente le gusta']]
 
-    fig = plt.figure(figsize=(10, 7))
-    ax = fig.add_subplot(projection='3d')
-    ax.scatter(X_rests_svd[:, 0], X_rests_svd[:, 1], X_rests_svd[:, 2],
-               marker='o', alpha=0.4, label='Restaurants')
-    ax.scatter(X_rests_svd[nearest, 0], X_rests_svd[nearest, 1], X_rests_svd[nearest, 2],
-               marker='X', s=100, c='red', label='Recommended')
-    ax.scatter(client_vec_svd[0, 0], client_vec_svd[0, 1], client_vec_svd[0, 2],
-               marker='^', s=150, c='green', label=f'Client {client_id}')
-    ax.set_xlabel('SVD Comp1')
-    ax.set_ylabel('SVD Comp2')
-    ax.set_zlabel('SVD Comp3')
-    ax.set_title(f'3D SVD: Cliente {client_id} & Recomendados')
-    ax.legend(loc='best')
-    plt.tight_layout()
 
-    return result, None, fig
+    return result, None
 
 # ----------- INTERFAZ STREAMLIT ----------- #
 def run():
@@ -165,5 +146,3 @@ def run():
             st.markdown("#### Preferencias de categorías de comida (Pie Chart)")
             plot_preference_pie_nivo(client_id)
 
-            st.markdown("#### Visualización 3D en espacio SVD")
-            st.pyplot(fig3d)
