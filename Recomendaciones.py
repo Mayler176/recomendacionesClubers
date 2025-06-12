@@ -1,5 +1,4 @@
 import streamlit as st
-st.set_page_config(page_title="Recomendador Clubers", layout="centered")  # ← debe ir aquí arriba
 
 import pandas as pd
 import numpy as np
