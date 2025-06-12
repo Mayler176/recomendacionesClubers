@@ -40,18 +40,34 @@ def cargar_modelo():
 
 # --- Función principal que llama app.py ---
 def run():
+
+    try:
+        raise Exception("Debug start")
+    except Exception as e:
+        st.info("ModeloPlatillos iniciado correctamente.")
+
     st.title("Recomendador de Restaurantes")
 
     # Carga del modelo (cacheado)
-    modelo = cargar_modelo()
-    global tfidf_vec, rest_vecs, cli_vecs, cli_idx_map, desc_rest, socios, perfil_cliente
-    tfidf_vec = modelo['tfidf_vec']
-    rest_vecs = modelo['rest_vecs']
-    cli_vecs = modelo['cli_vecs']
-    cli_idx_map = modelo['cli_idx_map']
-    desc_rest = modelo['desc_rest']
-    socios = modelo['socios']
-    perfil_cliente = modelo['perfil_cliente']
+
+    # modelo = cargar_modelo()
+    tfidf_vec = None
+    rest_vecs = None
+    cli_vecs = None
+    cli_idx_map = {24: 0}  # Simula que el cliente existe
+    desc_rest = pd.DataFrame({
+        'NumeroProveedor': [1,2,3,4,5],
+        'NombreRestaurante': ['A','B','C','D','E'],
+        'latitud': [25.65]*5,
+        'longitud': [-100.29]*5,
+        'CategoryId': [1,2,3,4,5]
+    })
+    socios = desc_rest.copy()
+    perfil_cliente = pd.DataFrame()
+
+
+    #modelo = cargar_modelo()
+
 
     # Interfaz
     cliente_id = st.number_input("Ingresa tu ID de cliente:", min_value=0, step=1)
