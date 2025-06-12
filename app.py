@@ -9,12 +9,12 @@ from shapely.geometry import Point
 import folium
 from streamlit_folium import st_folium
 
-# --- Configuración de página ---
+# --- Configuración de la página ---
 st.set_page_config(page_title="Clubers Recomendador", layout="wide")
 
 # --- Funciones auxiliares ---
 def haversine(lat1, lon1, lat2, lon2):
-    R = 6371  # Radio de la Tierra en km
+    R = 6371
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
     a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
@@ -26,7 +26,7 @@ def cargar_modelo():
     with open('modelo_recomendador.pkl', 'rb') as f:
         return pickle.load(f)
 
-# --- Cargar modelo una sola vez ---
+# --- Cargar modelo solo una vez ---
 modelo = cargar_modelo()
 tfidf_vec = modelo['tfidf_vec']
 rest_vecs = modelo['rest_vecs']
@@ -36,8 +36,8 @@ desc_rest = modelo['desc_rest']
 socios = modelo['socios']
 perfil_cliente = modelo['perfil_cliente']
 
-# --- Título e interfaz ---
-st.title("Recomendador de Restaurantes - Clubers")
+# --- UI Principal ---
+st.title("Recomendador de Restaurantes")
 
 cliente_id = st.number_input("Ingresa tu ID de cliente:", min_value=0, step=1)
 
@@ -73,6 +73,7 @@ if st.button("Obtener recomendaciones"):
         st.subheader("Top 5 Recomendaciones")
         st.dataframe(top5[['NombreRestaurante', 'CategoryId', 'similarity', 'distance_km']])
 
+        # --- Mapa ---
         geometry = [Point(xy) for xy in zip(top5['longitud'], top5['latitud'])]
         gdf_recs = gpd.GeoDataFrame(top5, geometry=geometry, crs="EPSG:4326")
 
