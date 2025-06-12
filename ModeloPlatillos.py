@@ -9,11 +9,12 @@ from shapely.geometry import Point
 import folium
 from streamlit_folium import st_folium
 
+# --- Funciones auxiliares ---
 def haversine(lat1, lon1, lat2, lon2):
-    R = 6371
+    R = 6371  # Radio de la Tierra en km
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
-    a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
+    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 
@@ -32,27 +33,34 @@ def recomendar(cliente_id, n=10):
     resultados = resultados.groupby('CategoryId', group_keys=False).head(2)
     return resultados.head(n)
 
-# Cargar modelo al nivel global (esto sí puede estar fuera)
-with open('modelo_recomendador.pkl', 'rb') as f:
-    modelo = pickle.load(f)
+@st.cache_resource
+def cargar_modelo():
+    with open('modelo_recomendador.pkl', 'rb') as f:
+        return pickle.load(f)
 
-tfidf_vec = modelo['tfidf_vec']
-rest_vecs = modelo['rest_vecs']
-cli_vecs = modelo['cli_vecs']
-cli_idx_map = modelo['cli_idx_map']
-desc_rest = modelo['desc_rest']
-socios = modelo['socios']
-perfil_cliente = modelo['perfil_cliente']
-
+# --- Función principal que llama app.py ---
 def run():
     st.title("Recomendador de Restaurantes")
 
+    # Carga del modelo (cacheado)
+    modelo = cargar_modelo()
+    global tfidf_vec, rest_vecs, cli_vecs, cli_idx_map, desc_rest, socios, perfil_cliente
+    tfidf_vec = modelo['tfidf_vec']
+    rest_vecs = modelo['rest_vecs']
+    cli_vecs = modelo['cli_vecs']
+    cli_idx_map = modelo['cli_idx_map']
+    desc_rest = modelo['desc_rest']
+    socios = modelo['socios']
+    perfil_cliente = modelo['perfil_cliente']
+
+    # Interfaz
     cliente_id = st.number_input("Ingresa tu ID de cliente:", min_value=0, step=1)
 
     if st.button("Obtener recomendaciones"):
         try:
             recs = recomendar(cliente_id, n=10)
 
+            # Ubicación simulada del usuario
             user_lat, user_lon = 25.651435, -100.290686
             st.markdown(f"**Ubicación del usuario:** {user_lat:.5f}, {user_lon:.5f}")
 
@@ -67,6 +75,7 @@ def run():
             st.subheader("Top 5 Recomendaciones")
             st.dataframe(top5[['NombreRestaurante', 'CategoryId', 'similarity', 'distance_km']])
 
+            # Mapa
             geometry = [Point(xy) for xy in zip(top5['longitud'], top5['latitud'])]
             gdf_recs = gpd.GeoDataFrame(top5, geometry=geometry, crs="EPSG:4326")
 

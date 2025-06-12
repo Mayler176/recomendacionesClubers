@@ -133,7 +133,7 @@ def run():
     client_id = st.selectbox("Selecciona un cliente", cliente_ids)
     num_recs = st.slider("Número de recomendaciones", 1, 10, value=5)
 
-    resultados, error, fig3d = recommend_restaurants_for_client_SVD(client_id, n=num_recs)
+    resultados, error = recommend_restaurants_for_client_SVD(client_id, n=num_recs)
     if st.button("Recomendar"):
         if error:
             st.error(error)
