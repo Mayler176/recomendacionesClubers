@@ -23,11 +23,10 @@ def cargar_modelo():
     with open('modelo_recomendador.pkl', 'rb') as f:
         return pickle.load(f)
 
-# --- Función principal que será llamada por app.py ---
 def run():
     st.title("Recomendador de Restaurantes")
 
-    # Cargar modelo desde caché
+    # Cargar el modelo desde cache
     modelo = cargar_modelo()
     tfidf_vec = modelo['tfidf_vec']
     rest_vecs = modelo['rest_vecs']
@@ -37,34 +36,34 @@ def run():
     socios = modelo['socios']
     perfil_cliente = modelo['perfil_cliente']
 
-    # Declarar la función recomendar dentro de run()
     def recomendar(cliente_id, n=10):
         if cliente_id not in cli_idx_map:
             raise ValueError("Cliente no encontrado.")
+
         idx = cli_idx_map[cliente_id]
         sims = cosine_similarity(cli_vecs[idx], rest_vecs).flatten()
+
         resultados = desc_rest[['NumeroProveedor']].copy()
         resultados['similarity'] = sims
         resultados = resultados.merge(
             socios[['NumeroProveedor', 'CategoryId', 'NombreRestaurante', 'latitud', 'longitud']],
             on='NumeroProveedor'
         )
+
         resultados = resultados.sort_values(by='similarity', ascending=False)
         resultados = resultados.groupby('CategoryId', group_keys=False).head(2)
         return resultados.head(n)
 
-    # Interfaz de usuario
+    # UI: Cliente
     cliente_id = st.number_input("Ingresa tu ID de cliente:", min_value=0, step=1)
 
     if st.button("Obtener recomendaciones"):
         try:
             recs = recomendar(cliente_id, n=10)
 
-            # Ubicación simulada
             user_lat, user_lon = 25.651435, -100.290686
             st.markdown(f"**Ubicación del usuario:** {user_lat:.5f}, {user_lon:.5f}")
 
-            # Distancia
             recs['distance_km'] = recs.apply(
                 lambda row: haversine(user_lat, user_lon, row['latitud'], row['longitud']),
                 axis=1
